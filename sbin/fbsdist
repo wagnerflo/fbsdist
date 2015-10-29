@@ -1,0 +1,33 @@
+#!/bin/sh
+
+name=${0}
+prefix=$(realpath $(dirname $(realpath ${name}))/../share/fbsdist)
+cmd=${1}
+shift
+
+case "${cmd}" in
+    init|import|install|list|rm|select)
+        exec env -i \
+         _fbsdist_prefix=${prefix} _fbsdist_name=${name} _fbsdist_cmd=${cmd} \
+         PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin \
+         /bin/sh -e ${prefix}/fbsdist_${cmd}.sh "${@}"
+        ;;
+    edit)
+        exec env \
+         _fbsdist_prefix=${prefix} _fbsdist_name=${name} _fbsdist_cmd=${cmd} \
+         /bin/sh -e ${prefix}/fbsdist_${cmd}.sh "${@}"
+        ;;
+    *)
+        cat <<EOF
+usage: ${name} COMMAND OPTIONS
+commands:
+  init
+  import
+  install
+  list
+  rm
+  select
+EOF
+        exit 1
+        ;;
+esac

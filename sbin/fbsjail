@@ -1,0 +1,24 @@
+#!/bin/sh
+
+name=${0}
+prefix=$(realpath $(dirname $(realpath ${name}))/../share/fbsdist)
+cmd=${1}
+shift
+
+case "${cmd}" in
+    build)
+        exec env -i \
+         _fbsdist_prefix=${prefix} _fbsdist_name=${name} _fbsdist_cmd=${cmd} \
+         _fbsjail_etc=${FBSJAIL_ETC} _poudriere_etc=${POUDRIERE_ETC} \
+         PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin \
+         /bin/sh -e ${prefix}/fbsjail_${cmd}.sh "${@}"
+        ;;
+    *)
+        cat <<EOF
+usage: ${name} COMMAND OPTIONS
+commands:
+  build
+EOF
+        exit 1
+        ;;
+esac
