@@ -40,6 +40,7 @@ done
 # retrieve src snapshot and check if it's valid
 #
 eval _srcsnap=$(sed -n '/^FBSJAIL_SRCSNAP=/s/FBSJAIL_SRCSNAP=//p' ${_srcconf})
+eval _jailcomp=$(sed -n '/^FBSJAIL_COMPRESSION=/s/FBSJAIL_COMPRESSION=//p' ${_srcconf})
 
 if ! is_snapshot ${_srcsnap}; then
     echo "error: source dataset ${_srcsnap} is not a snapshot"
@@ -80,7 +81,7 @@ add_cleanup rm -r ${_tmpdir}
 
 if ! zfs clone \
          -o atime=off \
-         -o compression=gzip \
+         -o compression=${_jailcomp:-gzip-9} \
          -o mountpoint=none \
          -o sync=disabled \
          ${_srcsnap} ${_tmpfs} >/dev/null 2>&1; then
