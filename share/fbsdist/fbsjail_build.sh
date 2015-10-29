@@ -39,7 +39,7 @@ done
 
 # retrieve src snapshot and check if it's valid
 #
-eval _srcsnap=$(sed -n '/^SRC=/s/SRC=//p' ${_srcconf})
+eval _srcsnap=$(sed -n '/^FBSJAIL_SRCSNAP=/s/FBSJAIL_SRCSNAP=//p' ${_srcconf})
 
 if ! is_snapshot ${_srcsnap}; then
     echo "error: source dataset ${_srcsnap} is not a snapshot"
@@ -117,7 +117,7 @@ add_cleanup umount ${_objdir}
 
 # prepare config files for build
 #
-sed -e 's/#.*$//' -e 's/^.*=dist//' -e 's/^SRC=.*//' -e '/^$/d' \
+sed -e 's/#.*$//' -e 's/^.*=dist//' -e 's/^FBSJAIL_.*//' -e '/^$/d' \
     ${_srcconf} > ${_objdir}/src.conf
 ln -s $(realpath ${_kernconf}) ${_objdir}/${_name}
 
