@@ -81,7 +81,7 @@ add_cleanup rm -r ${_tmpdir}
 
 if ! zfs clone \
          -o atime=off \
-         -o compression=${_jailcomp:-gzip-9} \
+         -o compression=${_jailcomp:-gzip} \
          -o mountpoint=none \
          -o sync=disabled \
          ${_srcsnap} ${_tmpfs} >/dev/null 2>&1; then
