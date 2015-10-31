@@ -34,30 +34,33 @@ for _file in "${_srcconf}" "${_kernconf}"; do
     fi
 done
 
-# retrieve src snapshot and check if it's valid
+# retrieve configuration and check validity
 #
 eval _srcsnap=$(sed -n '/^FBSJAIL_SRCSNAP=/s/FBSJAIL_SRCSNAP=//p' ${_srcconf})
 eval _jailcomp=$(sed -n '/^FBSJAIL_COMPRESSION=/s/FBSJAIL_COMPRESSION=//p' ${_srcconf})
+eval _distdest=$(sed -n '/^FBSJAIL_DIST_DEST=/s/FBSJAIL_DIST_DEST=//p' ${_srcconf})
 
 if ! is_snapshot ${_srcsnap}; then
     err 1 "source dataset ${_srcsnap} is not a snapshot"
 fi
 
+_jailcomp=${_jailcomp:-gzip}
+_distdest=${_distdest:-/tmp}
+
+if [ ! -d "${_distdest}" ]; then
+    err 1 "distribution destination ${_distdest} is not a directory"
+fi
+
 # Calculate filesystems and create if necessary
 #
 _jailsfs=$(poudriere_api get_jailsfs)
-_jailsdir=$(get_mountpoint ${_jailsfs})
-
-if [ -z "${_jailsdir}" ]; then
-    err 1 "jails filesystem ${_jailsfs} is not mounted"
-fi
-
 _basefs=${_jailsfs}/${_name}
 
 if ! is_filesystem ${_basefs}; then
-    if ! zfs create -o atime=off ${_basefs} >/dev/null 2>&1; then
+    if ! zfs create -p -o atime=off ${_basefs} >/dev/null 2>&1; then
         err 1 "couldn't create missing filesystem ${_basefs}"
     fi
+    add_cleanup zfs destroy ${_basefs}
 fi
 
 _basedir=$(get_mountpoint ${_basefs})
@@ -66,9 +69,9 @@ if [ -z ${_basedir} ]; then
     err 1 "filesystem ${_basefs} is not mounted"
 fi
 
-# clone and mount source
+# clone source snapshot and mount to temporary directory
 #
-_tmpdir=$(mktemp -d)
+_tmpdir=$(tmpdir)
 _tmpfs=${_basefs}/$(basename "${_tmpdir}")
 add_cleanup rm -r ${_tmpdir}
 
@@ -76,36 +79,47 @@ if ! zfs clone \
          -o atime=off \
          -o compression=${_jailcomp:-gzip} \
          -o mountpoint=none \
-         -o sync=disabled \
          ${_srcsnap} ${_tmpfs} >/dev/null 2>&1; then
     err 1 "error: can't clone ${_srcsnap} to ${_tmpfs}"
 fi
 
 add_cleanup zfs destroy ${_tmpfs}
 
-mount -t zfs ${_tmpfs} ${_tmpdir}
+mountzfs ${_tmpfs} ${_tmpdir}
 add_cleanup umount ${_tmpdir}
 
-# prepare filesystem for building
+# move contents into usr/src subdirectory
 #
 _realsrcdir=${_tmpdir}/usr/src
-_realobjdir=${_tmpdir}/usr/obj
-_distdir=${_realobjdir}/dist
 
-mkdir -p ${_realsrcdir} ${_realobjdir} ${_distdir}
-add_cleanup chflags -R noschg ${_realobjdir}
-add_cleanup rm -r ${_realobjdir}
-find ${_tmpdir} -mindepth 1 -maxdepth 1 -not -name usr -exec mv {} ${_realsrcdir} \;
+mkdir -p ${_realsrcdir}
+find ${_tmpdir} -mindepth 1 -maxdepth 1 -not -name usr \
+     -exec mv {} ${_realsrcdir} \;
 
-# null mount to /usr/src and /usr/obj
+# create temporary filesystem for usr/obj
+#
+_objfs=${_tmpfs}/obj
+
+if ! zfs create \
+         -o compression=off \
+         -o sync=disabled \
+         -o mountpoint=none \
+         ${_objfs} >/dev/null 2>&1; then
+    err 1 "error: can't create obj directory"
+fi
+
+add_cleanup zfs destroy ${_objfs}
+
+# mount to /usr/src and /usr/obj
 #
 _srcdir=/usr/src
 _objdir=/usr/obj
+_distdir=${_objdir}/dist
 
 mount_nullfs ${_realsrcdir} ${_srcdir}
 add_cleanup umount ${_srcdir}
 
-mount_nullfs ${_realobjdir} ${_objdir}
+mountzfs ${_objfs} ${_objdir}
 add_cleanup umount ${_objdir}
 
 # prepare config files for build
@@ -173,7 +187,7 @@ EOF
 
 # prepare package
 #
-package dist ${_distdir} ${_basedir}/${_name}.${_timestamp}.fbsdist
+package dist ${_distdir} ${_distdest}/${_name}.${_timestamp}.fbsdist
 
 # prepare jail
 #
@@ -187,11 +201,8 @@ del_cleanup umount ${_srcdir}
 umount ${_objdir}
 del_cleanup umount ${_objdir}
 
-chflags -R noschg ${_realobjdir}
-del_cleanup chflags -R noschg ${_realobjdir}
-
-rm -r ${_realobjdir}
-del_cleanup rm -r ${_realobjdir}
+zfs destroy ${_objfs}
+del_cleanup zfs destroy ${_objfs}
 
 umount -f ${_tmpdir}
 del_cleanup umount ${_tmpdir}
@@ -200,8 +211,8 @@ zfs rename ${_tmpfs} ${_jailfs}
 del_cleanup zfs destroy ${_tmpfs}
 add_cleanup zfs destroy ${_jailfs}
 
-zfs inherit sync ${_jailfs}
 zfs inherit mountpoint ${_jailfs}
 zfs snapshot ${_jailfs}@clean
 
 del_cleanup zfs destroy ${_jailfs}
+del_cleanup zfs destroy ${_basefs}
