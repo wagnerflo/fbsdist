@@ -73,10 +73,6 @@ mountzfs() {
     mount -t zfs ${1} ${2}
 }
 
-msg() {
-    echo "====>> ${1}"
-}
-
 err() {
     echo "Error: ${2}" >&2
     exit ${1}
