@@ -22,18 +22,15 @@ _kernconf=${_confdir}/kernel.conf
 # check if configuration directory exists
 #
 if [ ! -d "${_confdir}" ]; then
-    echo "error: ${_confdir} doesn't exist or is no directory"
-    exit 1
+    err 1 "${_confdir} doesn't exist or is no directory"
 fi
 
 # check if configuration files exist
 #
 for _file in "${_srcconf}" "${_kernconf}"; do
     if [ ! -f "${_file}" ]; then
-        echo -n "error: "
-        echo -n "$(basename $(dirname "${_file}"))/$(basename "${_file}") "
-        echo    "doesn't exist or is no file"
-        exit 1
+        err 1 "$(basename $(dirname "${_file}"))/$(basename "${_file}")" \
+            "doesn't exist or is no file"
     fi
 done
 
@@ -43,8 +40,7 @@ eval _srcsnap=$(sed -n '/^FBSJAIL_SRCSNAP=/s/FBSJAIL_SRCSNAP=//p' ${_srcconf})
 eval _jailcomp=$(sed -n '/^FBSJAIL_COMPRESSION=/s/FBSJAIL_COMPRESSION=//p' ${_srcconf})
 
 if ! is_snapshot ${_srcsnap}; then
-    echo "error: source dataset ${_srcsnap} is not a snapshot"
-    exit 1
+    err 1 "source dataset ${_srcsnap} is not a snapshot"
 fi
 
 # Calculate filesystems and create if necessary
@@ -53,24 +49,21 @@ _jailsfs=$(list_by_type jails)
 _jailsdir=$(get_mountpoint ${_jailsfs})
 
 if [ -z "${_jailsdir}" ]; then
-    echo "error: jails filesystem ${_jailsfs} is not mounted"
-    exit 1
+    err 1 "jails filesystem ${_jailsfs} is not mounted"
 fi
 
 _basefs=${_jailsfs}/${_name}
 
 if ! is_filesystem ${_basefs}; then
     if ! zfs create -o atime=off ${_basefs} >/dev/null 2>&1; then
-        echo "error: couldn't create missing filesystem ${_basefs}"
-        exit 1
+        err 1 "couldn't create missing filesystem ${_basefs}"
     fi
 fi
 
 _basedir=$(get_mountpoint ${_basefs})
 
 if [ -z ${_basedir} ]; then
-    echo "error: filesystem ${_basefs} is not mounted"
-    exit 1
+    err 1 "filesystem ${_basefs} is not mounted"
 fi
 
 # clone and mount source
@@ -85,8 +78,7 @@ if ! zfs clone \
          -o mountpoint=none \
          -o sync=disabled \
          ${_srcsnap} ${_tmpfs} >/dev/null 2>&1; then
-    echo "error: can't clone ${_srcsnap} to ${_tmpfs}"
-    exit 1
+    err 1 "error: can't clone ${_srcsnap} to ${_tmpfs}"
 fi
 
 add_cleanup zfs destroy ${_tmpfs}
