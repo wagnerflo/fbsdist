@@ -8,6 +8,8 @@ unexport() {
 unexport _fbsdist_prefix
 unexport _fbsdist_name
 unexport _fbsdist_cmd
+unexport _fbsjail_etc
+unexport _poudriere_etc
 
 sig_handler() {
     trap - SIGTERM SIGKILL
