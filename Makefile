@@ -1,11 +1,14 @@
 SCRIPTS=	sbin/${SCRIPT}
 SCRIPTSDIR=	${PREFIX}/sbin
 
-FILES=		share/fbsdist/${SCRIPT}_*
+FILES=		share/fbsdist/${SCRIPT}_*.sh
+FILESDIR=	${PREFIX}/share/fbsdist
+
 .if ${SCRIPT} == "fbsdist"
 FILES+=		share/fbsdist/common.sh
+.elif ${SCRIPT} == "fbsjail"
+FILES+=		share/fbsdist/poudriere_*.sh
 .endif
-FILESDIR=	${PREFIX}/share/fbsdist
 
 beforeinstall:
 	test -e "${DESTDIR}${SCRIPTSDIR}" || mkdir -p "${DESTDIR}${SCRIPTSDIR}"
