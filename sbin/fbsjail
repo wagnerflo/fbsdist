@@ -6,7 +6,7 @@ cmd=${1}
 shift
 
 case "${cmd}" in
-    build|list)
+    build|list|select)
         exec env -i \
          _fbsdist_prefix=${prefix} _fbsdist_name=${name} _fbsdist_cmd=${cmd} \
          _fbsjail_etc=${FBSJAIL_ETC} _poudriere_etc=${POUDRIERE_ETC} \
@@ -19,6 +19,7 @@ usage: ${name} COMMAND OPTIONS
 commands:
   build
   list
+  select
 EOF
         exit 1
         ;;
