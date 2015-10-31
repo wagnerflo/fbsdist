@@ -76,8 +76,11 @@ mountzfs() {
 }
 
 err() {
-    echo "Error: ${2}" >&2
-    exit ${1}
+    local _code
+    _code=${1}
+    shift
+    echo "Error: ${@}" >&2
+    exit ${_code}
 }
 
 request() {
