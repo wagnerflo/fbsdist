@@ -145,5 +145,25 @@ EOF
     echo ${_type} ${_timestamp} ${_version} ${_sha256}
 }
 
+parse_newvers() {
+    local _srcdir _src_REVISION _src_BRANCH
+    _srcdir=${1}
+
+    eval _src_$(grep ^REVISION= ${_srcdir}/sys/conf/newvers.sh)
+    eval _src_$(grep ^BRANCH= ${_srcdir}/sys/conf/newvers.sh)
+
+    _version="${_src_REVISION}-${_src_BRANCH}"
+
+    case "${_src_BRANCH}" in
+        RELEASE*) ;;
+        *)
+	    _svnversion="$(svnversion -qn ${_srcdir})"
+	    _version="${_version}-r${_svnversion}"
+	    ;;
+    esac
+
+    echo ${_version}
+}
+
 trap sig_handler SIGINT SIGTERM SIGKILL
 trap exit_handler EXIT

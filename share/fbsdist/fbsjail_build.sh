@@ -156,21 +156,10 @@ makesrc distribution DESTDIR=${_distdir} \
     || err 1 "Failed to install distribution files into distribution"
 
 # calculate version
-eval _src_$(grep ^REVISION= ${_srcdir}/sys/conf/newvers.sh)
-eval _src_$(grep ^BRANCH= ${_srcdir}/sys/conf/newvers.sh)
-
+_version=$(parse_newvers ${_srcdir})
 _timestamp=$(date -jf " %a %b %d %T %Z %Y" \
 		  "$(strings ${_distdir}/boot/kernel/kernel | grep "^@(#)" | \
              cut -d ':' -f 2-)" "+%s")
-_version="${_src_REVISION}-${_src_BRANCH}"
-
-case "${_src_BRANCH}" in
-    RELEASE*) ;;
-    *)
-	_svnversion="$(svnversion -qn ${_srcdir})"
-	_version="${_version}-r${_svnversion}"
-	;;
-esac
 
 package () {
     _sha256=$( \
