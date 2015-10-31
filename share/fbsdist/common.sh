@@ -165,5 +165,13 @@ parse_newvers() {
     echo ${_version}
 }
 
+poudriere_api() {
+    local _cmd
+    _cmd=${1}
+    shift
+    POUDRIERE_ETC=${_poudriere_etc} poudriere api \
+        . ${_fbsdist_prefix}/poudriere_${_cmd}.sh "${@}"
+}
+
 trap sig_handler SIGINT SIGTERM SIGKILL
 trap exit_handler EXIT

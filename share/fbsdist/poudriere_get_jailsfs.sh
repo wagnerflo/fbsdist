@@ -1,0 +1,1 @@
+echo ${ZPOOL}${ZROOTFS}/jails

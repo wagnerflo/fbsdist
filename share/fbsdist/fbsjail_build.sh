@@ -45,7 +45,7 @@ fi
 
 # Calculate filesystems and create if necessary
 #
-_jailsfs=$(list_by_type jails)
+_jailsfs=$(poudriere_api get_jailsfs)
 _jailsdir=$(get_mountpoint ${_jailsfs})
 
 if [ -z "${_jailsdir}" ]; then
