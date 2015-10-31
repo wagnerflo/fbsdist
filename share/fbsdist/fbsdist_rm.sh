@@ -13,8 +13,7 @@ fi
 request container
 _fs=${container}/${_item}
 
-if [ "$(zfs get -H -slocal -ovalue fbsdist:type ${_fs} 2>/dev/null)" \
-        = "root" ]
+if [ "$(zget fbsdist:type ${_fs} 2>/dev/null)" = "root" ]
 then
     request rootfs
     [ "${_fs}" = "${rootfs}" ] && \
