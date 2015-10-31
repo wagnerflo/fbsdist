@@ -38,7 +38,7 @@ add_cleanup zfs destroy -r ${_nextfs}
 _nextmnt=$(tmpdir)
 add_cleanup rm -rf ${_nextmnt}
 
-mountfs ${_nextfs} ${_nextmnt}
+mountzfs ${_nextfs} ${_nextmnt}
 add_cleanup umount ${_nextmnt}
 
 tar xf ${container_mnt}/${_dist}/data -C ${_nextmnt}
@@ -53,13 +53,13 @@ then
     _current=$(tmpdir)
     add_cleanup rm -rf ${_current}
 
-    mountfs ${rootfs}@clean ${_origin}
+    mountzfs ${rootfs}@clean ${_origin}
     add_cleanup umount ${_origin}
 
     zfs snapshot ${rootfs}@__fbsdist_current__
     add_cleanup zfs destroy ${rootfs}@__fbsdist_current__
 
-    mountfs ${rootfs}@__fbsdist_current__ ${_current}
+    mountzfs ${rootfs}@__fbsdist_current__ ${_current}
     add_cleanup umount ${_current}
 
     env -i PATH=${PATH} \

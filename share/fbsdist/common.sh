@@ -69,7 +69,7 @@ tmpdir() {
     mktemp -d -tfbsdist
 }
 
-mountfs() {
+mountzfs() {
     mount -t zfs ${1} ${2}
 }
 
@@ -101,7 +101,7 @@ request() {
                 err 1 "Cannot mount container; no filesystem destignated as such"
             container_mnt=$(tmpdir)
             add_cleanup rm -r ${container_mnt}
-            mountfs ${container} ${container_mnt}
+            mountzfs ${container} ${container_mnt}
             add_cleanup umount ${container_mnt}
             ;;
     esac
