@@ -7,7 +7,7 @@ copy () {
     _current="${current}${1}"
     _new="${new}${1}"
 
-    if [ -e "${_current}" ]; then
+    if [ -e "${_current}" -o -L "${_current}" ]; then
         log "Copying ${1} unmodified"
         cp -a "${_current}" "${_new}"
     else
