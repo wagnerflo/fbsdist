@@ -60,10 +60,10 @@ merge () {
 
     command merge \
         -L "new distributed" -L "origin" -L "current modified" \
-        -p "${_new}" "${_origin}" "${_current}" > "${_new}.merged" 2>/dev/null
-    _conflicts=${?}
+        -p "${_new}" "${_origin}" "${_current}" > "${_new}.merged" \
+        2>/dev/null && _conflicts=0 || _conflicts=$?
 
-    if [ ${_conflicts} ]; then
+    if [ ${_conflicts} -eq 0 ]; then
         log "No merge conflicts for ${1}; patch follows"
         diff -u "${_new}" "${_new}.merged" | tail -n +3
         printf "End of patch. Apply (y/N)? "
