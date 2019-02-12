@@ -125,13 +125,13 @@ add_cleanup umount ${_objdir}
 # prepare config files for build
 #
 sed -e 's/#.*$//' -e 's/^.*=dist//' -e 's/^FBSJAIL_.*//' -e '/^$/d' \
-    ${_srcconf} > ${_objdir}/src.conf
-ln -s $(realpath ${_kernconf}) ${_objdir}/${_name}
+    ${_srcconf} > ${_srcdir}/src.conf
+cp $(realpath ${_kernconf}) ${_srcdir}/${_name}
 
 makesrc() {
     env MAKEOBJDIRPREFIX=${_objdir} \
-	SRCCONF=${_objdir}/src.conf \
-	KERNCONFDIR=${_objdir} KERNCONF=${_name} \
+	SRCCONF=${_srcdir}/src.conf \
+	KERNCONFDIR=${_srcdir} KERNCONF=${_name} \
 	__MAKE_CONF=/dev/null NO_CLEAN=yes \
         make -C${_srcdir} -j${_parallel_jobs} "${@}"
 }
