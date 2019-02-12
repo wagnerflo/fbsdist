@@ -21,6 +21,7 @@ case "${cmd}" in
         cat <<EOF
 usage: ${name} COMMAND OPTIONS
 commands:
+  edit
   init
   import
   install
