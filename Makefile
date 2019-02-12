@@ -1,13 +1,13 @@
 SCRIPTS=	sbin/${SCRIPT}
 SCRIPTSDIR=	${PREFIX}/sbin
 
-FILES=		share/fbsdist/${SCRIPT}_*.sh
+FILES=		${:!ls share/fbsdist/${SCRIPT}_*.sh!}
 FILESDIR=	${PREFIX}/share/fbsdist
 
 .if ${SCRIPT} == "fbsdist"
 FILES+=		share/fbsdist/common.sh
 .elif ${SCRIPT} == "fbsjail"
-FILES+=		share/fbsdist/poudriere_*.sh
+FILES+=		${:!ls share/fbsdist/poudriere_*.sh!}
 .endif
 
 beforeinstall:
