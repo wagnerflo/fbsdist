@@ -58,9 +58,9 @@ merge () {
         return
     fi
 
-    command merge \
-        -L "new distributed" -L "origin" -L "current modified" \
-        -p "${_new}" "${_origin}" "${_current}" > "${_new}.merged" \
+    command diff3 \
+        -L "NEW" -L "ORIGIN" -L "CURRENT" \
+        -m "${_new}" "${_origin}" "${_current}" > "${_new}.merged" \
         2>/dev/null && _conflicts=0 || _conflicts=$?
 
     if [ ${_conflicts} -eq 0 ]; then
