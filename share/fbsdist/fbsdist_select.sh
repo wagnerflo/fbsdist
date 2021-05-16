@@ -16,4 +16,4 @@ list_by_type root | grep -q ^${_fs}$ || \
     err 1 "No root filesystem ${_fs}"
 
 request container_mnt
-echo "${_fs}:" > ${container_mnt}/boot.config
+echo "zfs:${_fs}:boot/loader" > ${container_mnt}/boot.config
