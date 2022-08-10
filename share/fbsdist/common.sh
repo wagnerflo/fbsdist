@@ -108,7 +108,7 @@ request() {
     esac
 
     [ -z "${bootfs}" ] && case "${_items}" in
-        *,bootfs,*) bootfs=$(cut -d: -f1 ${container_mnt}/boot.config \
+        *,bootfs,*) bootfs=$(cut -d: -f2 ${container_mnt}/boot.config \
                                  2>/dev/null || true) ;;
     esac
 }
