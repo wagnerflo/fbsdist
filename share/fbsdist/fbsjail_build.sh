@@ -133,6 +133,7 @@ makesrc() {
 	SRCCONF=${_srcdir}/src.conf \
 	KERNCONFDIR=${_srcdir} KERNCONF=${_name} \
 	__MAKE_CONF=/dev/null NO_CLEAN=yes \
+        WITHOUT_REPRODUCIBLE_BUILD=yes \
         make -C${_srcdir} -j${_parallel_jobs} "${@}"
 }
 
